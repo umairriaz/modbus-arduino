@@ -1,6 +1,6 @@
 /*
     ModbusIP.cpp - Source for Modbus IP Library
-    Copyright (C) 2015 André Sarmento Barbosa
+    Copyright (C) 2015 AndrÃ© Sarmento Barbosa
 */
 #include "ModbusIP_ENC28J60.h"
 
@@ -63,8 +63,10 @@ void ModbusIP::task() {
         if (_reply != MB_REPLY_OFF) {
             //MBAP
             _MBAP[4] = _len >> 8;
-            _MBAP[5] = _len | 0x00FF;
-
+            //_MBAP[5] = _len | 0x00FF;  // OR is making it 255 must be &
+            _MBAP[5] = _len & 0x00FF;
+            _MBAP[5]++; // MBAP lenght field currently says one less byte.Must be increased by 1
+            
             BufferFiller bfill = ether.tcpOffset();
             bfill.emit_raw((const char *)_MBAP, 7);
             bfill.emit_raw((const char *)_frame, _len);
